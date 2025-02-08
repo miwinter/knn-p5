@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Dessin</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        #canvasContainer {
+            text-align: left;
+        }
+        #comparisonResults {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .referenceImagesContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MNIST Dessin</h1>
+    <div id="canvasContainer"></div>
+    <div id="controls">
+        <p>Nom du fichier : <input type="text" id="filenameInput" value="mnist_drawn.png"></p>
+        <button onclick="clearCanvas()">Effacer</button>
+        <button onclick="saveImage()">Enregistrer</button>
+        <button onclick="compareDigits()">Comparer</button>
+    </div>
+    <div id="comparisonResults"></div>
+
+    <script>
+        let canvasSize = 280;
+        let mnistSize = 28;
+        let drawing;
+        let brushSize = 15;
+        let distances = [];
+        let referenceImages = [];
+        let lastX, lastY;
+
+        function setup() {
+            let canvas = createCanvas(canvasSize, canvasSize);
+            canvas.parent('canvasContainer');
+            canvas.style.display = "block";
+            canvas.style.float = "left";
+            background(0);
+            drawing = createGraphics(canvasSize, canvasSize);
+            drawing.background(0);
+        }
+
+        function draw() {
+            image(drawing, 0, 0);
+        }
+
+        function mousePressed() {
+            lastX = mouseX;
+            lastY = mouseY;
+        }
+
+        function mouseDragged() {
+            if (mouseX >= 0 && mouseX < canvasSize && mouseY >= 0 && mouseY < canvasSize) {
+                drawing.stroke(255);
+                drawing.strokeWeight(brushSize);
+                drawing.line(lastX, lastY, mouseX, mouseY);
+                lastX = mouseX;
+                lastY = mouseY;
+            }
+        }
+
+        function clearCanvas() {
+            drawing.background(0);
+        }
+
+        function saveImage() {
+            let mnistImage = drawing.get();
+            mnistImage.resize(mnistSize, mnistSize);
+            let filename = document.getElementById("filenameInput").value;
+            save(mnistImage, filename);
+        }
+
+        function compareDigits() {
+            let mnistImage = drawing.get();
+            mnistImage.resize(mnistSize, mnistSize);
+            mnistImage.loadPixels();
+            let drawnArray = mnistImage.pixels;
+            
+            distances = [];
+            referenceImages = [];
+            for (let i = 0; i < 10; i++) {
+                let refImg = loadImage(`mnist_drawn_${i}.png`, img => {
+                    img.resize(mnistSize, mnistSize);
+                    img.loadPixels();
+                    let refArray = img.pixels;
+                    let distance = 0;
+                    for (let j = 0; j < refArray.length; j++) {
+                        distance += Math.abs(drawnArray[j] - refArray[j]);
+                    }
+                    distances.push({digit: i, distance: distance, image: img});
+                    if (distances.length === 10) {
+                        displayResults(mnistImage);
+                    }
+                });
+                referenceImages.push(refImg);
+            }
+        }
+
+        function displayResults(drawnImage) {
+            distances.sort((a, b) => a.distance - b.distance);
+            console.log('Résultats de comparaison :', distances);
+            
+            let resultsDiv = document.getElementById("comparisonResults");
+            resultsDiv.innerHTML = "<h2>Comparaison des images</h2>";
+            
+            let drawnContainer = document.createElement("div");
+            drawnContainer.style.marginBottom = "10px";
+            drawnContainer.innerHTML = "<strong>Image dessinée :</strong>";
+            let drawnImg = document.createElement("img");
+            drawnImg.src = drawnImage.canvas.toDataURL();
+            drawnImg.style.width = "50px";
+            drawnImg.style.height = "50px";
+            drawnImg.style.display = "block";
+            drawnImg.style.margin = "5px auto";
+            drawnContainer.appendChild(drawnImg);
+            resultsDiv.appendChild(drawnContainer);
+            
+            let referenceImagesContainer = document.createElement("div");
+            referenceImagesContainer.className = "referenceImagesContainer";
+            
+            distances.forEach(d => {
+                let imgContainer = document.createElement("div");
+                imgContainer.style.display = "inline-block";
+                imgContainer.style.textAlign = "center";
+                imgContainer.style.margin = "5px";
+                
+                let label = document.createElement("p");
+                label.innerText = `Chiffre ${d.digit} - Dist: ${d.distance.toFixed(2)}`;
+                label.style.fontSize = "12px";
+                label.style.margin = "2px";
+                
+                let imgElement = document.createElement("img");
+                imgElement.src = d.image.canvas.toDataURL();
+                imgElement.style.width = "50px";
+                imgElement.style.height = "50px";
+                
+                imgContainer.appendChild(label);
+                imgContainer.appendChild(imgElement);
+                referenceImagesContainer.appendChild(imgContainer);
+            });
+            resultsDiv.appendChild(referenceImagesContainer);
+        }
+    </script>
+</body>
+</html>
