@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démo Backpropagation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        .slider-good { background: lightgreen; }
+        .slider-bad { background: lightcoral; }
+    </style>
+</head>
+<body>
+    <script>
+        let w0Slider, w1Slider, w2Slider, w3Slider, w4Slider;
+        let lastError;
+        let points = [];
+        let trueW0, trueW1, trueW2, trueW3, trueW4;
+
+        function setup() {
+            createCanvas(600, 600);
+            
+            // Définition aléatoire des poids à deviner
+            trueW0 = random(-3, 3);
+            trueW1 = random(-3, 3);
+            trueW2 = random(-3, 3);
+            trueW3 = random(-3, 3);
+            trueW4 = random(-3, 3);
+            
+            let targetFunction = (x) => trueW0 * x**3 + trueW1 * x**2 + trueW2 * x + 5*trueW3 + 10*trueW4*sin(x);
+            
+            w0Slider = createSlider(-5, 5, random(-2, 2), 0.01);
+            w0Slider.position(10, height - 70);
+            w1Slider = createSlider(-5, 5, random(-2, 2), 0.01);
+            w1Slider.position(10, height - 100);
+            w2Slider = createSlider(-5, 5, random(-2, 2), 0.01);
+            w2Slider.position(10, height - 130);
+            w3Slider = createSlider(-5, 5, random(-2, 2), 0.01);
+            w3Slider.position(10, height - 160);
+            w4Slider = createSlider(-5, 5, random(-2, 2), 0.01);
+            w4Slider.position(10, height - 190);
+            
+            // Génération de quelques points d'exemple
+            // les points ne sont comptabilisés que s'ils sont positionnés à l'intérieur de la fenêtre
+            // Avec une boucle while
+            let i = 0;
+            while (i < 20) {
+                let x = random(-5, 5);
+                let y = targetFunction(x);
+                if (x >= -5 && x <= 5 && y >= -20 && y <= 20) {
+                    points.push({ x, y });
+                    i++;
+                }
+            }
+            lastError = computeError();
+        }
+
+        function computeError() {
+            let w0 = w0Slider.value();
+            let w1 = w1Slider.value();
+            let w2 = w2Slider.value();
+            let w3 = w3Slider.value();
+            let w4 = w4Slider.value();
+            let error = 0;
+            
+            for (let p of points) {
+                let prediction = w0 * p.x**3 + w1 * p.x**2 + w2 * p.x + 5*w3 + 10*w4*sin(p.x);
+                error += (prediction - p.y) ** 2;
+            }
+            return error / points.length;
+        }
+
+        function draw() {
+            background(220);
+            let w0 = w0Slider.value();
+            let w1 = w1Slider.value();
+            let w2 = w2Slider.value();
+            let w3 = w3Slider.value();
+            let w4 = w4Slider.value();
+            let error = computeError();
+            
+            lastError = error;
+            
+            // Affichage des points cibles
+            fill(255, 0, 0);
+            for (let p of points) {
+                let px = map(p.x, -5, 5, 50, width - 50);
+                let py = map(p.y, -20, 20, height - 50, 50);
+                ellipse(px, py, 8, 8);
+            }
+            
+            // Affichage de la courbe prédite
+            stroke(0);
+            noFill();
+            beginShape();
+            for (let x = -5; x <= 5; x += 0.1) {
+                let y = w0 * x**3 + w1 * x**2 + w2 * x + 5*w3 + 10*w4*sin(x);
+                let px = map(x, -5, 5, 50, width - 50);
+                let py = map(y, -20, 20, height - 50, 50);
+                vertex(px, py);
+            }
+            endShape();
+            
+            // Affichage de l'erreur
+            noStroke();
+            fill(0);
+            textSize(16);
+            text(`Erreur: ${error.toFixed(2)}`, 5, height - 20);
+            text(`w0: ${w0.toFixed(2)}`, 150, height - 65);
+            text(`w1: ${w1.toFixed(2)}`, 150, height - 95);
+            text(`w2: ${w2.toFixed(2)}`, 150, height - 125);
+            text(`w3: ${w3.toFixed(2)}`, 150, height - 155);
+            text(`w4: ${w4.toFixed(2)}`, 150, height - 185);
+        }
+    </script>
+</body>
+</html>
