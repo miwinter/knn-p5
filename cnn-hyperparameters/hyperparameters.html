@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convolution Hyperparameters</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        .container {
+            display: flex;
+            align-items: flex-start;
+        }
+        .controls {
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Interactive Convolution Hyperparameters</h2>
+    <div class="container">
+        <div class="controls" id="controls-container"></div>
+        <div id="canvas-container"></div>
+    </div>
+    
+    <script>
+        let inputSize = 5;
+        let kernelSize = 2;
+        let stride = 1;
+        let padding = 0;
+        let inputMatrix, outputMatrix;
+        let kernelX = 0, kernelY = 0;
+        let outputX = 0, outputY = 0;
+        let animationFrame = 0;
+        let cellSize = 20;
+        let canvas;
+        
+        function setup() {
+            let canvasContainer = select('#canvas-container');
+            canvas = createCanvas(1, 1);
+            canvas.parent(canvasContainer);
+            createControls();
+            adjustCanvasSize();
+            calculateOutput();
+        }
+        
+        function adjustCanvasSize() {
+            let inputWidth = (inputSize + 2 * padding) * cellSize;
+            let outputWidth = Math.floor((inputSize + 2 * padding - kernelSize) / stride + 1) * cellSize;
+            let canvasWidth = inputWidth + outputWidth + 100;
+            let canvasHeight = Math.max(inputWidth, outputWidth) + 50;
+            resizeCanvas(canvasWidth, canvasHeight);
+        }
+
+        function draw() {
+            background(255);
+            let inputOffset = 50;
+            let outputOffset = inputOffset + (inputSize + 2 * padding) * cellSize + 50;
+            drawMatrix(inputOffset, 50, inputMatrix, 'Input', true, kernelX, kernelY);
+            drawMatrix(outputOffset, 50, outputMatrix, 'Output', false, outputX, outputY);
+            animateKernel();
+        }
+
+        function createControls() {
+            let controlsContainer = select('#controls-container');
+            function addControl(labelText, min, max, value, callback) {
+                let label = createP(`${labelText}: ${value}`).parent(controlsContainer);
+                let slider = createSlider(min, max, value).parent(controlsContainer);
+                slider.input(() => {
+                    let newValue = slider.value();
+                    label.html(`${labelText}: ${newValue}`);
+                    callback(newValue);
+                });
+            }
+            
+            addControl('Input Size', 3, 10, inputSize, (val) => { inputSize = val; adjustCanvasSize(); calculateOutput(); });
+            addControl('Kernel Size', 1, 5, kernelSize, (val) => { kernelSize = val; adjustCanvasSize(); calculateOutput(); });
+            addControl('Stride', 1, 5, stride, (val) => { stride = val; calculateOutput(); });
+            addControl('Padding', 0, 5, padding, (val) => { padding = val; adjustCanvasSize(); calculateOutput(); });
+        }
+
+        function calculateOutput() {
+            let paddedSize = inputSize + 2 * padding;
+            let outputSize = Math.floor((paddedSize - kernelSize) / stride) + 1;
+            inputMatrix = createMatrix(inputSize + 2 * padding, padding);
+            outputMatrix = createMatrix(outputSize, 0);
+            kernelX = 0;
+            kernelY = 0;
+            outputX = 0;
+            outputY = 0;
+            animationFrame = 0;
+        }
+
+        function createMatrix(size, paddingSize) {
+            let matrix = [];
+            for (let i = 0; i < size; i++) {
+                let row = [];
+                for (let j = 0; j < size; j++) {
+                    row.push((i < paddingSize || j < paddingSize || i >= size - paddingSize || j >= size - paddingSize) ? 1 : 0);
+                }
+                matrix.push(row);
+            }
+            return matrix;
+        }
+
+        function drawMatrix(x, y, matrix, label, isInput, highlightX, highlightY) {
+            fill(0);
+            textAlign(CENTER);
+            text(label, x + matrix.length * cellSize / 2, y - 10);
+            
+            for (let i = 0; i < matrix.length; i++) {
+                for (let j = 0; j < matrix.length; j++) {
+                    if (isInput && matrix[i][j] === 1) {
+                        fill('lightblue'); // Padding color
+                    } else {
+                        fill('white');
+                    }
+                    if (isInput && i >= highlightY && i < highlightY + kernelSize && j >= highlightX && j < highlightX + kernelSize) {
+                        fill('red'); // Highlight kernel movement
+                    }
+                    if (!isInput && i === outputY && j === outputX) {
+                        fill('green'); // Highlight single output cell
+                    }
+                    stroke(0);
+                    rect(x + j * cellSize, y + i * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        function animateKernel() {
+            if (animationFrame % 30 === 0) {
+                kernelX += stride;
+                if (kernelX + kernelSize > inputMatrix.length) {
+                    kernelX = 0;
+                    kernelY += stride;
+                    if (kernelY + kernelSize > inputMatrix.length) {
+                        kernelY = 0;
+                    }
+                }
+                outputX = Math.floor(kernelX / stride);
+                outputY = Math.floor(kernelY / stride);
+            }
+            animationFrame++;
+        }
+    </script>
+</body>
+</html>
