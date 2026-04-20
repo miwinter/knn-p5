@@ -1,18 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Sketch</title>
+    <title>Classification par le Plus-Proche-Voisin</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
   </head>
 
   <body>
+    <main class="app">
+      <h1>Classification par le Plus-Proche-Voisin</h1>
+
+      <div class="workspace">
+        <div id="sketch-holder"></div>
+
+        <aside class="side-panel">
+          <div class="controls">
+            <label class="control-group" for="k-slider">
+              <span id="k-value">k = 3</span>
+              <input id="k-slider" type="range" min="1" max="11" value="3" />
+            </label>
+
+            <label class="control-group checkbox-group" for="bg-checkbox">
+              <input id="bg-checkbox" type="checkbox" />
+              <span>Afficher la carte</span>
+            </label>
+
+            <div class="control-group zoom-group">
+              <span>Zoom de la zone de traçage</span>
+              <div class="zoom-buttons">
+                <button id="zoom-out" type="button">- 10%</button>
+                <button id="zoom-in" type="button">+ 10%</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="legend" aria-label="Légende">
+            <span class="legend-item">
+              <span class="legend-color legend-red"></span>
+              rouge = rien
+            </span>
+            <span class="legend-item">
+              <span class="legend-color legend-green"></span>
+              vert = gaz
+            </span>
+            <span class="legend-item">
+              <span class="legend-color legend-blue"></span>
+              bleu = pétrole
+            </span>
+          </div>
+        </aside>
+      </div>
+    </main>
+
     <script src="sketch.js"></script>
   </body>
 </html>

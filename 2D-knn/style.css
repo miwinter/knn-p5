@@ -1,8 +1,159 @@
 html, body {
   margin: 0;
   padding: 0;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #eef3f6 0%, #dce6eb 100%);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  color: #1f2a33;
+}
+
+.app {
+  width: min(94vw, 980px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 28px 24px 32px;
+}
+
+.workspace {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 230px;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  letter-spacing: 0.02em;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(31, 42, 51, 0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+}
+
+.checkbox-group {
+  cursor: pointer;
+}
+
+.zoom-group {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.zoom-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #1f2a33;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:hover {
+  background: #2c3c47;
+}
+
+input[type="range"] {
+  accent-color: #1f2a33;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(31, 42, 51, 0.12);
+  border-radius: 14px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.legend-red {
+  background: #e53935;
+}
+
+.legend-green {
+  background: #43a047;
+}
+
+.legend-blue {
+  background: #1e88e5;
+}
+
+#sketch-holder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 canvas {
   display: block;
+}
+
+@media (max-width: 640px) {
+  .app {
+    width: min(96vw, 980px);
+    padding: 20px 14px 24px;
+  }
+
+  .workspace {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .side-panel {
+    width: 100%;
+    min-width: 0;
+    max-width: 560px;
+  }
 }
